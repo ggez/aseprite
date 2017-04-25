@@ -1,7 +1,14 @@
 [package]
 name = "aseprite"
+description = "A crate to load files from the aseprite sprite editor."
 version = "0.1.0"
 authors = ["Simon Heath <icefoxen@gmail.com>"]
+repository = "https://github.com/ggez/aseprite"
+documentation = "https://docs.rs/aseprite"
+keywords = ["graphics", "2D", "game"]
+license = "MIT"
+readme = "README.md"
+categories = ["games", "rendering::data-formats", "multimedia::images"]
 
 [dependencies]
 serde = "1.0"
