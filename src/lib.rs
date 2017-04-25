@@ -38,22 +38,36 @@ pub struct Frame {
     duration: u32,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Direction {
+    #[serde(rename="forward")]
+    Forward,
+    #[serde(rename="backward")]
+    Backward,
+    #[serde(rename="pingpong")]
+    Pingpong
+}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Frametag {
     name: String,
     from: u32,
     to: u32,
-    direction: String,
+    direction: Direction,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+pub enum BlendMode {
+    #[serde(rename="normal")]
+    Normal,
+}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Layer {
     name: String,
     opacity: u32,
     #[serde(rename = "blendMode")]
-    blend_mode: String,
+    blend_mode: BlendMode,
 }
 
 
@@ -65,8 +79,8 @@ pub struct Metadata {
     size: Dimensions,
     scale: String, // Surely this should be a number?
     #[serde(rename = "frameTags")]
-    frame_tags: Vec<Frametag>,
-    layers: Vec<Layer>,
+    frame_tags: Option<Vec<Frametag>>,
+    layers: Option<Vec<Layer>>,
 }
 
 
@@ -81,9 +95,7 @@ pub struct SpritesheetData {
 mod tests {
     extern crate serde_json;
 
-    #[test]
-    fn test_sprite_load_save() {
-        let s = r##"{ "frames": [
+    const S: &'static str = r##"{ "frames": [
    {
     "filename": "boonga 0.ase",
     "frame": { "x": 1, "y": 1, "w": 18, "h": 18 },
@@ -106,7 +118,7 @@ mod tests {
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.1.6-dev",
-  "image": "../models/boonga.png",
+  "image": "boonga.png",
   "format": "RGBA8888",
   "size": { "w": 39, "h": 20 },
   "scale": "1",
@@ -120,11 +132,58 @@ mod tests {
 }
 "##;
 
-        let deserialized: super::SpritesheetData = serde_json::from_str(s).unwrap();
+    
+    const S_NO_META: &'static str = r##"{ "frames": [
+   {
+    "filename": "boonga 0.ase",
+    "frame": { "x": 1, "y": 1, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 250
+   },
+   {
+    "filename": "boonga 1.ase",
+    "frame": { "x": 20, "y": 1, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 250
+   }
+ ],
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.1.6-dev",
+  "image": "boonga.png",
+  "format": "RGBA8888",
+  "size": { "w": 39, "h": 20 },
+  "scale": "1"
+ }
+}
+"##;
+
+    
+    #[test]
+    fn test_sprite_load_save() {
+        let deserialized: super::SpritesheetData = serde_json::from_str(S).unwrap();
 
         let serialized = serde_json::to_string(&deserialized).unwrap();
         let deserialized_again: super::SpritesheetData = serde_json::from_str(&serialized).unwrap();
 
         assert_eq!(deserialized, deserialized_again);
     }
+
+    
+    #[test]
+    fn test_less_metadata() {
+        let deserialized: super::SpritesheetData = serde_json::from_str(S_NO_META).unwrap();
+
+        let serialized = serde_json::to_string(&deserialized).unwrap();
+        let deserialized_again: super::SpritesheetData = serde_json::from_str(&serialized).unwrap();
+
+        assert_eq!(deserialized, deserialized_again);
+    }
+
 }
