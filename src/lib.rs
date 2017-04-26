@@ -42,8 +42,8 @@ pub struct Frame {
 pub enum Direction {
     #[serde(rename="forward")]
     Forward,
-    #[serde(rename="backward")]
-    Backward,
+    #[serde(rename="reverse")]
+    Reverse,
     #[serde(rename="pingpong")]
     Pingpong
 }
@@ -56,10 +56,43 @@ pub struct Frametag {
     direction: Direction,
 }
 
+// These are listed at:
+// https://github.com/aseprite/aseprite/blob/2e3bbe2968da65fa8852ebb94464942bf9cb8870/src/doc/blend_mode.cpp#L17
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum BlendMode {
     #[serde(rename="normal")]
     Normal,
+    #[serde(rename="multiply")]
+    Multiply,
+    #[serde(rename="screen")]
+    Screen,
+    #[serde(rename="overlay")]
+    Overlay,
+    #[serde(rename="darken")]
+    Darken,
+    #[serde(rename="lighten")]
+    Lighten,
+    #[serde(rename="color_dodge")]
+    ColorDodge,
+    #[serde(rename="color_burn")]
+    ColorBurn,
+    #[serde(rename="hard_light")]
+    HardLight,
+    #[serde(rename="soft_light")]
+    SoftLight,
+    #[serde(rename="difference")]
+    Difference,
+    #[serde(rename="exclusion")]
+    Exclusion,
+    #[serde(rename="hsl_hue")]
+    HslHue,
+    #[serde(rename="hsl_saturation")]
+    HslSaturation,
+    #[serde(rename="hsl_color")]
+    HslColor,
+    #[serde(rename="hsl_luminosity")]
+    HslLuminosity,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
