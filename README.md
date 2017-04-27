@@ -7,6 +7,10 @@ exported in the "json-array" format (which isn't the default for some reason but
 
 Automatically exporting a sprite to a given format is documented here: <https://www.aseprite.org/docs/cli/>
 
+# Docs
+
+Documentation is on [docs.rs](https://docs.rs/aseprite/0.1.1/aseprite/)
+
 # Example
 
 Export sprite sheet with:
