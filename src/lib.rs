@@ -1,41 +1,53 @@
-//! An importer for aseprite's image+json sprite animations.
+//! A crate for loading data from the aseprite sprite editor. Should
+//! go along well with the tiled crate, I hope!
 //!
-//! In aseprite, go to file->export sprite sheet,
-//! choose to export json data, and select "array" rather than "hash"
-//! because that makes sense.
+//! It does not load any actual images, just the metadata. Currently
+//! it only loads aseprite's JSON export format, and only when
+//! exported in a particular format that has all the options just
+//! right. I've yet to find a use case that won't cover though.
 //!
-//! Tested with aseprite 1.1.6, as on Debian Stretch.
+//! Automatically exporting a sprite to a given format is documented
+//! here: https://www.aseprite.org/docs/cli/ The easy way to export in
+//! the right format is to use a command such as `aseprite -b
+//! boonga.ase --sheet boonga.png --format json-array --data
+//! boonga.json`
+//!
+//! Otherwise you have to go to `file->export sprite sheet` and select
+//! "array" rather than "hash".  Every.  Single.  Time.
+//!
+//! This has been tested to work with aseprite 1.1.6; newer or older
+//! versions have not been tested.
 
 #[macro_use]
 extern crate serde_derive;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Rect {
-    x: u32,
-    y: u32,
-    w: u32,
-    h: u32,
+    pub x: u32,
+    pub y: u32,
+    pub w: u32,
+    pub h: u32,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Dimensions {
-    w: u32,
-    h: u32,
+    pub w: u32,
+    pub h: u32,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Frame {
-    filename: String,
-    frame: Rect,
-    rotated: bool,
-    trimmed: bool,
+    pub filename: String,
+    pub frame: Rect,
+    pub rotated: bool,
+    pub trimmed: bool,
     #[serde(rename = "spriteSourceSize")]
-    sprite_source_size: Rect,
+    pub sprite_source_size: Rect,
     #[serde(rename = "sourceSize")]
-    source_size: Dimensions,
-    duration: u32,
+    pub source_size: Dimensions,
+    pub duration: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
@@ -45,15 +57,15 @@ pub enum Direction {
     #[serde(rename="reverse")]
     Reverse,
     #[serde(rename="pingpong")]
-    Pingpong
+    Pingpong,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Frametag {
-    name: String,
-    from: u32,
-    to: u32,
-    direction: Direction,
+    pub name: String,
+    pub from: u32,
+    pub to: u32,
+    pub direction: Direction,
 }
 
 // These are listed at:
@@ -97,30 +109,30 @@ pub enum BlendMode {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Layer {
-    name: String,
-    opacity: u32,
+    pub name: String,
+    pub opacity: u32,
     #[serde(rename = "blendMode")]
-    blend_mode: BlendMode,
+    pub blend_mode: BlendMode,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Metadata {
-    app: String,
-    version: String,
-    format: String,
-    size: Dimensions,
-    scale: String, // Surely this should be a number?
+    pub app: String,
+    pub version: String,
+    pub format: String,
+    pub size: Dimensions,
+    pub scale: String, // Surely this should be a number?
     #[serde(rename = "frameTags")]
-    frame_tags: Option<Vec<Frametag>>,
-    layers: Option<Vec<Layer>>,
+    pub frame_tags: Option<Vec<Frametag>>,
+    pub layers: Option<Vec<Layer>>,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct SpritesheetData {
-    frames: Vec<Frame>,
-    meta: Metadata,
+    pub frames: Vec<Frame>,
+    pub meta: Metadata,
 }
 
 
@@ -165,7 +177,7 @@ mod tests {
 }
 "##;
 
-    
+
     const S_NO_META: &'static str = r##"{ "frames": [
    {
     "filename": "boonga 0.ase",
@@ -197,7 +209,7 @@ mod tests {
 }
 "##;
 
-    
+
     #[test]
     fn test_sprite_load_save() {
         let deserialized: super::SpritesheetData = serde_json::from_str(S).unwrap();
@@ -208,7 +220,7 @@ mod tests {
         assert_eq!(deserialized, deserialized_again);
     }
 
-    
+
     #[test]
     fn test_less_metadata() {
         let deserialized: super::SpritesheetData = serde_json::from_str(S_NO_META).unwrap();
