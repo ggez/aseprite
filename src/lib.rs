@@ -126,6 +126,7 @@ pub struct Metadata {
     #[serde(rename = "frameTags")]
     pub frame_tags: Option<Vec<Frametag>>,
     pub layers: Option<Vec<Layer>>,
+    pub image: Option<String>,
 }
 
 
