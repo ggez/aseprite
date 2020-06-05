@@ -38,29 +38,27 @@ pub struct Dimensions {
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[serde(rename_all="camelCase")]
 pub struct Frame {
     pub filename: String,
     pub frame: Rect,
     pub rotated: bool,
     pub trimmed: bool,
-    #[serde(rename = "spriteSourceSize")]
     pub sprite_source_size: Rect,
-    #[serde(rename = "sourceSize")]
     pub source_size: Dimensions,
     pub duration: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+#[serde(rename_all="camelCase")]
 pub enum Direction {
-    #[serde(rename="forward")]
     Forward,
-    #[serde(rename="reverse")]
     Reverse,
-    #[serde(rename="pingpong")]
     Pingpong,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+/// TODO: To be consistent with Aseprite this should be called `FrameTag`.
 pub struct Frametag {
     pub name: String,
     pub from: u32,
@@ -72,60 +70,81 @@ pub struct Frametag {
 // https://github.com/aseprite/aseprite/blob/2e3bbe2968da65fa8852ebb94464942bf9cb8870/src/doc/blend_mode.cpp#L17
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+#[serde(rename_all="camelCase")]
 pub enum BlendMode {
-    #[serde(rename="normal")]
     Normal,
-    #[serde(rename="multiply")]
     Multiply,
-    #[serde(rename="screen")]
     Screen,
-    #[serde(rename="overlay")]
     Overlay,
-    #[serde(rename="darken")]
     Darken,
-    #[serde(rename="lighten")]
     Lighten,
-    #[serde(rename="color_dodge")]
     ColorDodge,
-    #[serde(rename="color_burn")]
     ColorBurn,
-    #[serde(rename="hard_light")]
     HardLight,
-    #[serde(rename="soft_light")]
     SoftLight,
-    #[serde(rename="difference")]
     Difference,
-    #[serde(rename="exclusion")]
     Exclusion,
-    #[serde(rename="hsl_hue")]
     HslHue,
-    #[serde(rename="hsl_saturation")]
     HslSaturation,
-    #[serde(rename="hsl_color")]
     HslColor,
-    #[serde(rename="hsl_luminosity")]
     HslLuminosity,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
-pub struct Layer {
+pub struct Cel {
+    frame: u32,
+    //opacity: u32, // TODO: This should be here, but isn't!
+    color: String,
+    data: Option<String>,
+
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[serde(untagged, rename_all="camelCase")]
+pub enum Layer {
+    Layer {
+        name: String,
+        group: Option<String>,
+        opacity: u32,
+        blend_mode: BlendMode,
+        cels: Option<Vec<Cel>>,
+        color: Option<String>,
+        data: Option<String>,
+    },
+    Group {
+        name: String,
+        color: Option<String>,
+        data: Option<String>,
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct Key {
+    pub frame: u32,
+    pub bounds: Rect,
+    pub center: Option<Rect>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct Slice {
     pub name: String,
-    pub opacity: u32,
-    #[serde(rename = "blendMode")]
-    pub blend_mode: BlendMode,
+    pub color: String,
+    pub keys: Vec<Key>,
+    pub data: Option<String>,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[serde(rename_all="camelCase")]
 pub struct Metadata {
     pub app: String,
     pub version: String,
     pub format: String,
     pub size: Dimensions,
     pub scale: String, // Surely this should be a number?
-    #[serde(rename = "frameTags")]
     pub frame_tags: Option<Vec<Frametag>>,
     pub layers: Option<Vec<Layer>>,
+    pub slices: Option<Vec<Slice>>,
     pub image: Option<String>,
 }
 
