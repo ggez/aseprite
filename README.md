@@ -8,7 +8,7 @@ Automatically exporting a sprite to a given format is documented here: <https://
 
 # Docs
 
-Documentation is on [docs.rs](https://docs.rs/aseprite/0.1.3/aseprite/)
+Documentation for the latest version is on [docs.rs](https://docs.rs/aseprite/)
 
 # Example
 
