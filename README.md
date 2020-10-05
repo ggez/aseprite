@@ -2,8 +2,7 @@
 
 A crate for loading data from the [aseprite](https://www.aseprite.org/) sprite editor.  Should go along well with the [tiled](https://github.com/mattyhall/rs-tiled) crate, I hope!
 
-It does not load any actual images, just the metadata.  Currently it only loads aseprite's JSON export format, and only when
-exported in the "json-array" format (which isn't the default for some reason but appears much more sensible than the alternative).
+It does not load any actual images, just the metadata.  Currently it only loads aseprite's JSON export format.
 
 Automatically exporting a sprite to a given format is documented here: <https://www.aseprite.org/docs/cli/>
 

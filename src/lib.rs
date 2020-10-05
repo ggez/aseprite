@@ -2,9 +2,8 @@
 //! go along well with the tiled crate, I hope!
 //!
 //! It does not load any actual images, just the metadata. Currently
-//! it only loads aseprite's JSON export format, and only when
-//! exported in a particular format that has all the options just
-//! right. I've yet to find a use case that won't cover though.
+//! it only loads aseprite's JSON export format.  I've yet to find a use case
+//! that won't cover though.
 //!
 //! Automatically exporting a sprite to a given format is documented
 //! here: https://www.aseprite.org/docs/cli/ The easy way to export in
@@ -12,10 +11,9 @@
 //! boonga.ase --sheet boonga.png --format json-array --data
 //! boonga.json`
 //!
-//! Otherwise you have to go to `file->export sprite sheet` and select
-//! "array" rather than "hash".  Every.  Single.  Time.
+//! Otherwise you have to go to `file->export sprite sheet`.
 //!
-//! This has been tested to work with aseprite 1.1.6; newer or older
+//! This has been tested to work with aseprite 1.1.6 and 1.2.25; other
 //! versions have not been tested.
 
 #[macro_use]
