@@ -14,3 +14,7 @@ categories = ["games", "rendering::data-formats", "multimedia::images"]
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+
+[dev-dependencies]
+aseprite-test-data  = "0.1.0"
+png                 = "0.16.7"
