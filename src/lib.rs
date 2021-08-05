@@ -66,10 +66,10 @@ impl serde::Serialize for Color {
 impl<'de> serde::Deserialize<'de> for Color {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let s : &str = serde::Deserialize::deserialize(deserializer)?;
-        if !s.starts_with("#") {
-            return Err(serde::de::Error::custom("color doesn't start with '#'"));
+        if !s.starts_with('#') {
+            Err(serde::de::Error::custom("color doesn't start with '#'"))
         } else if !s.len() == 7 {
-            return Err(serde::de::Error::custom("color has wrong length"));
+            Err(serde::de::Error::custom("color has wrong length"))
         } else {
             let r = u8::from_str_radix(&s[1..3], 16).map_err(|_| serde::de::Error::custom("color has non-hex red component"))?;
             let g = u8::from_str_radix(&s[3..5], 16).map_err(|_| serde::de::Error::custom("color has non-hex green component"))?;
@@ -118,18 +118,18 @@ fn deserialize_frames<'de, D: serde::Deserializer<'de>>(de: D) -> Result<Vec<Fra
         type Value = Vec<Frame>;
         fn expecting(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result { fmt.write_str("a json array or map") }
 
-        fn visit_map<M: serde::de::MapAccess<'de>>(self, mut map: M) -> Result<Self::Value, M::Error> {
-            let mut frames = Vec::new();
-            while let Some(key) = map.next_key()? {
-                frames.push(Frame { filename: key, data: map.next_value()? });
-            }
-            Ok(frames)
-        }
-
         fn visit_seq<S: serde::de::SeqAccess<'de>>(self, mut seq: S) -> Result<Self::Value, S::Error> {
             let mut frames = Vec::new();
             while let Some(frame) = seq.next_element()? {
                 frames.push(frame);
+            }
+            Ok(frames)
+        }
+
+        fn visit_map<M: serde::de::MapAccess<'de>>(self, mut map: M) -> Result<Self::Value, M::Error> {
+            let mut frames = Vec::new();
+            while let Some(key) = map.next_key()? {
+                frames.push(Frame { filename: key, data: map.next_value()? });
             }
             Ok(frames)
         }
@@ -280,7 +280,7 @@ pub struct SpritesheetData {
 mod tests {
     extern crate serde_json;
 
-    const S: &'static str = r##"{ "frames": [
+    const S: &str = r##"{ "frames": [
    {
     "filename": "boonga 0.ase",
     "frame": { "x": 1, "y": 1, "w": 18, "h": 18 },
@@ -318,7 +318,7 @@ mod tests {
 "##;
 
 
-    const S_NO_META: &'static str = r##"{ "frames": [
+    const S_NO_META: &str = r##"{ "frames": [
    {
     "filename": "boonga 0.ase",
     "frame": { "x": 1, "y": 1, "w": 18, "h": 18 },
@@ -564,8 +564,8 @@ mod tests {
             assert_eq!(name, array.name);
             assert_eq!(name, hash .name);
 
-            assert_eq!(group, array.group.as_ref().map(|s| s.as_str()));
-            assert_eq!(group, hash .group.as_ref().map(|s| s.as_str()));
+            assert_eq!(group, array.group.as_deref());
+            assert_eq!(group, hash .group.as_deref());
 
             assert_eq!(opacity, array.opacity);
             assert_eq!(opacity, hash .opacity);
@@ -576,8 +576,8 @@ mod tests {
             assert_eq!(color, array.color.as_ref().map(|c| format!("{:?}", c)));
             assert_eq!(color, hash .color.as_ref().map(|c| format!("{:?}", c)));
 
-            assert_eq!(data, array.data.as_ref().map(|s| s.as_str()));
-            assert_eq!(data, hash .data.as_ref().map(|s| s.as_str()));
+            assert_eq!(data, array.data.as_deref());
+            assert_eq!(data, hash .data.as_deref());
         }
 
         // slices
@@ -604,8 +604,8 @@ mod tests {
             assert_eq!(color, format!("{:?}", array.color));
             assert_eq!(color, format!("{:?}", hash .color));
 
-            assert_eq!(data, array.data.as_ref().map(|s| s.as_str()));
-            assert_eq!(data, hash .data.as_ref().map(|s| s.as_str()));
+            assert_eq!(data, array.data.as_deref());
+            assert_eq!(data, hash .data.as_deref());
 
             assert_eq!(1, array.keys.len());
             assert_eq!(1, hash .keys.len());
