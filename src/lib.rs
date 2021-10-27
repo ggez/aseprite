@@ -65,7 +65,7 @@ impl serde::Serialize for Color {
 
 impl<'de> serde::Deserialize<'de> for Color {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let s : &str = serde::Deserialize::deserialize(deserializer)?;
+        let s : String = serde::Deserialize::deserialize(deserializer)?;
         if !s.starts_with("#") {
             return Err(serde::de::Error::custom("color doesn't start with '#'"));
         } else if !s.len() == 7 {
