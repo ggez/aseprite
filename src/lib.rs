@@ -63,8 +63,8 @@ impl serde::Serialize for Color {
 impl<'de> serde::Deserialize<'de> for Color {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let s: &str = serde::Deserialize::deserialize(deserializer)?;
-        if !s.starts_with("#") {
-            return Err(serde::de::Error::custom("color doesn't start with '#'"));
+        if !s.starts_with('#') {
+            Err(serde::de::Error::custom("color doesn't start with '#'"))
         } else if !s.len() == 7 {
             return Err(serde::de::Error::custom("color has wrong length"));
         } else {
@@ -175,7 +175,9 @@ pub struct Frametag {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
+#[derive(Default)]
 pub enum BlendMode {
+    #[default]
     Normal,
     Multiply,
     Screen,
@@ -195,12 +197,6 @@ pub enum BlendMode {
     Addition,
     Subtract,
     Divide,
-}
-
-impl Default for BlendMode {
-    fn default() -> Self {
-        BlendMode::Normal
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -267,7 +263,7 @@ pub struct SpritesheetData {
 mod tests {
     extern crate serde_json;
 
-    const S: &'static str = r##"{ "frames": [
+    const S: &str = r##"{ "frames": [
    {
     "filename": "boonga 0.ase",
     "frame": { "x": 1, "y": 1, "w": 18, "h": 18 },
@@ -304,7 +300,7 @@ mod tests {
 }
 "##;
 
-    const S_NO_META: &'static str = r##"{ "frames": [
+    const S_NO_META: &str = r##"{ "frames": [
    {
     "filename": "boonga 0.ase",
     "frame": { "x": 1, "y": 1, "w": 18, "h": 18 },
@@ -811,8 +807,8 @@ mod tests {
             assert_eq!(name, array.name);
             assert_eq!(name, hash.name);
 
-            assert_eq!(group, array.group.as_ref().map(|s| s.as_str()));
-            assert_eq!(group, hash.group.as_ref().map(|s| s.as_str()));
+            assert_eq!(group, array.group.as_deref());
+            assert_eq!(group, hash.group.as_deref());
 
             assert_eq!(opacity, array.opacity);
             assert_eq!(opacity, hash.opacity);
@@ -823,8 +819,8 @@ mod tests {
             assert_eq!(color, array.color.as_ref().map(|c| format!("{:?}", c)));
             assert_eq!(color, hash.color.as_ref().map(|c| format!("{:?}", c)));
 
-            assert_eq!(data, array.data.as_ref().map(|s| s.as_str()));
-            assert_eq!(data, hash.data.as_ref().map(|s| s.as_str()));
+            assert_eq!(data, array.data.as_deref());
+            assert_eq!(data, hash.data.as_deref());
         }
 
         // slices
@@ -882,8 +878,8 @@ mod tests {
             assert_eq!(color, format!("{:?}", array.color));
             assert_eq!(color, format!("{:?}", hash.color));
 
-            assert_eq!(data, array.data.as_ref().map(|s| s.as_str()));
-            assert_eq!(data, hash.data.as_ref().map(|s| s.as_str()));
+            assert_eq!(data, array.data.as_deref());
+            assert_eq!(data, hash.data.as_deref());
 
             assert_eq!(1, array.keys.len());
             assert_eq!(1, hash.keys.len());
