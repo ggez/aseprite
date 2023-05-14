@@ -62,11 +62,11 @@ impl serde::Serialize for Color {
 
 impl<'de> serde::Deserialize<'de> for Color {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let s: &str = serde::Deserialize::deserialize(deserializer)?;
-        if !s.starts_with('#') {
+        let s: String = serde::Deserialize::deserialize(deserializer)?;
+        if !s.starts_with("#") {
             Err(serde::de::Error::custom("color doesn't start with '#'"))
         } else if !s.len() == 7 {
-            return Err(serde::de::Error::custom("color has wrong length"));
+            Err(serde::de::Error::custom("color has wrong length"))
         } else {
             let r = u8::from_str_radix(&s[1..3], 16)
                 .map_err(|_| serde::de::Error::custom("color has non-hex red component"))?;
