@@ -208,6 +208,7 @@ pub struct Layer {
     #[serde(default)] // 0 / missing for groups - editor shows "0" greyed out
     pub opacity: u32,
     // 0 / missing for groups - editor shows "Normal" greyed out
+    #[serde(default)]
     pub blend_mode: BlendMode,
     pub color: Option<Color>,
     pub data: Option<String>,
@@ -242,6 +243,7 @@ pub struct Metadata {
     pub format: String,
     pub size: Dimensions,
     pub scale: String, // Surely this should be a number?
+    #[serde(default)]
     pub frame_tags: Vec<Frametag>,
     #[serde(default)]
     pub layers: Vec<Layer>,
