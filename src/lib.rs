@@ -16,8 +16,7 @@
 //! This has been tested to work with aseprite 1.1.6 and 1.2.25; other
 //! versions have not been tested.
 
-#[macro_use]
-extern crate serde_derive;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Rect {
@@ -63,7 +62,7 @@ impl serde::Serialize for Color {
 impl<'de> serde::Deserialize<'de> for Color {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let s: String = serde::Deserialize::deserialize(deserializer)?;
-        if !s.starts_with("#") {
+        if !s.starts_with('#') {
             Err(serde::de::Error::custom("color doesn't start with '#'"))
         } else if !s.len() == 7 {
             Err(serde::de::Error::custom("color has wrong length"))
@@ -411,8 +410,7 @@ mod tests {
                 let (png_info, mut reader) = png::Decoder::new(std::io::Cursor::new(png))
                     .read_info()
                     .unwrap_or_else(|e| panic!("{}: error decoding info: {}", path, e));
-                let mut frame = Vec::new();
-                frame.resize(png_info.buffer_size(), 0);
+                let mut frame = vec![0; png_info.buffer_size()];
                 reader
                     .next_frame(&mut frame)
                     .unwrap_or_else(|e| panic!("{}: error decoding frame: {}", path, e));
