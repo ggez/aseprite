@@ -198,18 +198,34 @@ pub enum BlendMode {
     Divide,
 }
 
+/// Sprite layer or layer group.
+///
+/// This only applies when the sprite sheet is split by layer because otherwise the layers are already flattened.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct Layer {
+    /// Layer name.
     pub name: String,
+    /// Parent group.
+    ///
+    /// `None` when on the root level.
     pub group: Option<String>,
-    #[serde(default)] // 0 / missing for groups - editor shows "0" greyed out
-    pub opacity: u32,
-    // 0 / missing for groups - editor shows "Normal" greyed out
+    /// Opacity for the layer.
+    ///
+    /// `None` when the layer is a group.
     #[serde(default)]
-    pub blend_mode: BlendMode,
+    pub opacity: Option<u32>,
+    /// Blend mode of the layer.
+    ///
+    /// `None` when the layer is a group.
+    #[serde(default)]
+    pub blend_mode: Option<BlendMode>,
+    /// Color with which the layer is displayed in Aseprite.
+    ///
+    /// `None` when color is fully transparent.
     pub color: Option<Color>,
+    /// Custom data.
     pub data: Option<String>,
 }
 
@@ -622,168 +638,203 @@ mod tests {
             (
                 "Mode Layers",
                 "",
-                0,
-                BlendMode::Normal,
+                None,
+                None,
                 "#6acd5bff",
                 "Mode Layers User Data",
             ),
             (
                 "Layer Normal",
                 "Mode Layers",
-                255,
-                BlendMode::Normal,
+                Some(255),
+                Some(BlendMode::Normal),
                 "",
                 "",
             ),
             (
                 "Layer Darken",
                 "Mode Layers",
-                255,
-                BlendMode::Darken,
+                Some(255),
+                Some(BlendMode::Darken),
                 "",
                 "",
             ),
             (
                 "Layer Multiply",
                 "Mode Layers",
-                255,
-                BlendMode::Multiply,
+                Some(255),
+                Some(BlendMode::Multiply),
                 "",
                 "",
             ),
             (
                 "Layer Color Burn",
                 "Mode Layers",
-                255,
-                BlendMode::ColorBurn,
+                Some(255),
+                Some(BlendMode::ColorBurn),
                 "",
                 "",
             ),
             (
                 "Layer Lighten",
                 "Mode Layers",
-                255,
-                BlendMode::Lighten,
+                Some(255),
+                Some(BlendMode::Lighten),
                 "",
                 "",
             ),
             (
                 "Layer Screen",
                 "Mode Layers",
-                255,
-                BlendMode::Screen,
+                Some(255),
+                Some(BlendMode::Screen),
                 "",
                 "",
             ),
             (
                 "Layer Color Dodge",
                 "Mode Layers",
-                255,
-                BlendMode::ColorDodge,
+                Some(255),
+                Some(BlendMode::ColorDodge),
                 "",
                 "",
             ),
             (
                 "Layer Addition",
                 "Mode Layers",
-                255,
-                BlendMode::Addition,
+                Some(255),
+                Some(BlendMode::Addition),
                 "",
                 "",
             ),
             (
                 "Layer Overlay",
                 "Mode Layers",
-                255,
-                BlendMode::Overlay,
+                Some(255),
+                Some(BlendMode::Overlay),
                 "",
                 "",
             ),
             (
                 "Layer Soft Light",
                 "Mode Layers",
-                255,
-                BlendMode::SoftLight,
+                Some(255),
+                Some(BlendMode::SoftLight),
                 "",
                 "",
             ),
             (
                 "Layer Hard Light",
                 "Mode Layers",
-                255,
-                BlendMode::HardLight,
+                Some(255),
+                Some(BlendMode::HardLight),
                 "",
                 "",
             ),
             (
                 "Layer Difference",
                 "Mode Layers",
-                255,
-                BlendMode::Difference,
+                Some(255),
+                Some(BlendMode::Difference),
                 "",
                 "",
             ),
             (
                 "Layer Exclusion",
                 "Mode Layers",
-                255,
-                BlendMode::Exclusion,
+                Some(255),
+                Some(BlendMode::Exclusion),
                 "",
                 "",
             ),
             (
                 "Layer Subtract",
                 "Mode Layers",
-                255,
-                BlendMode::Subtract,
+                Some(255),
+                Some(BlendMode::Subtract),
                 "",
                 "",
             ),
             (
                 "Layer Divide",
                 "Mode Layers",
-                255,
-                BlendMode::Divide,
+                Some(255),
+                Some(BlendMode::Divide),
                 "",
                 "",
             ),
-            ("Layer Hue", "Mode Layers", 255, BlendMode::HslHue, "", ""),
+            (
+                "Layer Hue",
+                "Mode Layers",
+                Some(255),
+                Some(BlendMode::HslHue),
+                "",
+                "",
+            ),
             (
                 "Layer Saturation",
                 "Mode Layers",
-                255,
-                BlendMode::HslSaturation,
+                Some(255),
+                Some(BlendMode::HslSaturation),
                 "",
                 "",
             ),
             (
                 "Layer Color",
                 "Mode Layers",
-                255,
-                BlendMode::HslColor,
+                Some(255),
+                Some(BlendMode::HslColor),
                 "",
                 "",
             ),
             (
                 "Layer Luminosity",
                 "Mode Layers",
-                255,
-                BlendMode::HslLuminosity,
+                Some(255),
+                Some(BlendMode::HslLuminosity),
                 "",
                 "",
             ),
-            ("Layer Opacity 127", "", 127, BlendMode::Normal, "", ""),
-            ("Layer Locked", "", 255, BlendMode::Normal, "", ""),
+            (
+                "Layer Opacity 127",
+                "",
+                Some(127),
+                Some(BlendMode::Normal),
+                "",
+                "",
+            ),
+            (
+                "Layer Locked",
+                "",
+                Some(255),
+                Some(BlendMode::Normal),
+                "",
+                "",
+            ),
             (
                 "Layer User Data",
                 "",
-                255,
-                BlendMode::Normal,
+                Some(255),
+                Some(BlendMode::Normal),
                 "#f7a547ff",
                 "Orange Layer",
             ),
-            ("Layer Linked Cels", "", 255, BlendMode::Normal, "", ""),
-            ("Layer Even Cels", "", 255, BlendMode::Normal, "", ""),
+            (
+                "Layer Linked Cels",
+                "",
+                Some(255),
+                Some(BlendMode::Normal),
+                "",
+                "",
+            ),
+            (
+                "Layer Even Cels",
+                "",
+                Some(255),
+                Some(BlendMode::Normal),
+                "",
+                "",
+            ),
         ];
 
         assert_eq!(0, basic.meta.layers.len());
