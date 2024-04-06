@@ -16,33 +16,51 @@
 //! This has been tested to work with aseprite 1.1.6 and 1.2.25; other
 //! versions have not been tested.
 
+use std::ops::{Deref, DerefMut};
+
 use serde::{Deserialize, Serialize};
 
+/// 2D Rectangle with a position and a size.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Rect {
+    /// X coordinate.
     pub x: u32,
+    /// Y coordinate.
     pub y: u32,
+    /// Width.
     pub w: u32,
+    /// Height.
     pub h: u32,
 }
 
+/// 2D point is space.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Point {
+    /// X coordinate.
     pub x: u32,
+    /// Y coordinate.
     pub y: u32,
 }
 
+/// 2D size.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Dimensions {
+    /// Width.
     pub w: u32,
+    /// Height.
     pub h: u32,
 }
 
+/// RGBA color.
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub struct Color {
+    /// Red component.
     pub r: u8,
+    /// Green component.
     pub g: u8,
+    /// Blue component.
     pub b: u8,
+    /// Alpha component.
     pub a: u8,
 }
 
@@ -53,15 +71,15 @@ impl std::fmt::Debug for Color {
     }
 }
 
-impl serde::Serialize for Color {
+impl Serialize for Color {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         format!("{:?}", self).serialize(serializer)
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Color {
+impl<'de> Deserialize<'de> for Color {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let s: String = serde::Deserialize::deserialize(deserializer)?;
+        let s: String = Deserialize::deserialize(deserializer)?;
         if !s.starts_with('#') {
             Err(serde::de::Error::custom("color doesn't start with '#'"))
         } else if !s.len() == 7 {
@@ -80,35 +98,51 @@ impl<'de> serde::Deserialize<'de> for Color {
     }
 }
 
+/// A single frame as part of an animation.
+///
+/// Contains timing and position information.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Frame {
+    /// Local path on disk.
     pub filename: String,
+    /// Data for this frame.
     #[serde(flatten)]
     pub data: FrameData,
 }
 
-impl std::ops::Deref for Frame {
+impl Deref for Frame {
     type Target = FrameData;
     fn deref(&self) -> &Self::Target {
         &self.data
     }
 }
 
-impl std::ops::DerefMut for Frame {
+impl DerefMut for Frame {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.data
     }
 }
 
+/// Data for a single frame as part of an animation.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct FrameData {
+    /// Rectangle on the sprite sheet for this sprite including padding.
+    ///
+    /// If `trimmed` is true and coordinates are zero this is exactly the same as `sprite_source_size`.
     pub frame: Rect,
+    /// Whether the sprite is rotated.
     pub rotated: bool,
+    /// Whether the sprite is trimmed, meaning whether empty pixels from the edge have been removed.
     pub trimmed: bool,
+    /// Trimmed rectangle on the sprite sheet for this sprite.
+    ///
+    /// If `trimmed` is true and coordinates are zero this is exactly the same as `frame`.
     pub sprite_source_size: Rect,
+    /// Actual frame size.
     pub source_size: Dimensions,
+    /// Frame duration in milliseconds.
     pub duration: u32,
 }
 
@@ -149,28 +183,40 @@ fn deserialize_frames<'de, D: serde::Deserializer<'de>>(de: D) -> Result<Vec<Fra
     de.deserialize_any(FramesVisitor)
 }
 
+/// Frame animation direction.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum Direction {
+    /// Normal animation direction.
     Forward,
+    /// Reversed animation direction.
     Reverse,
+    /// Animation is played forward and then backward and so on.
     Pingpong,
 }
 
+/// Tagged frame group.
+///
+/// This is a way to define a single animation within the sprite sheet.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct Frametag {
+    /// Tag name.
     pub name: String,
+    /// Frame start number.
     pub from: u32,
+    /// Frame end number.
     pub to: u32,
+    /// Animation direction.
     pub direction: Direction,
 }
 
 // These are listed at:
 // https://github.com/aseprite/aseprite/blob/51b038ac024dd99902ab5b0c0d61524c48856b93/src/doc/blend_mode.cpp#L18-L37
 
+/// Layer blend modes.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
@@ -229,50 +275,85 @@ pub struct Layer {
     pub data: Option<String>,
 }
 
+/// Slice within the sprite.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct Slice {
+    /// Slice name.
     pub name: String,
+    /// Color with which the slice frame is displayed in Aseprite.
     pub color: Color,
-    pub data: Option<String>,
+    /// List of slice keys.
     pub keys: Vec<SliceKey>,
+    /// Custom data.
+    pub data: Option<String>,
 }
 
+/// Define the slice rectangle in a specific frame.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct SliceKey {
+    /// Frame number.
     pub frame: u32,
+    /// Outer slice bounds within the frame.
     pub bounds: Rect,
+    /// Pivot point within the slice.
     pub pivot: Option<Point>,
+    /// Center area of a nine-patch slice.
     pub center: Option<Rect>,
 }
 
+/// Sprite sheet metadata.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct Metadata {
+    /// Which application produced the sprite sheet.
     pub app: String,
+    /// Version of the application used to produce the sprite sheet.
     pub version: String,
+    /// Pixel format of the image file.
     pub format: String,
+    /// Pixel dimensions of the image file.
     pub size: Dimensions,
-    pub scale: String, // Surely this should be a number?
+    /// Scale of the image.
+    ///
+    /// Usually this is `1`.
+    ///
+    /// Unclear why this is a string, most likely to be compatible with the application the JSON is formatted after.
+    pub scale: String,
+    /// Relative path to the image file.
+    pub image: Option<String>,
+    /// List of tags.
+    ///
+    /// Only present when "Meta: Tags" is enabled when exporting in Aseprite.
     #[serde(default)]
     pub frame_tags: Vec<Frametag>,
+    /// List of layers.
+    ///
+    /// Only present when "Meta: Layers" is enabled when exporting in Aseprite.
     #[serde(default)]
     pub layers: Vec<Layer>,
-    pub image: Option<String>,
+    /// List of slices.
+    ///
+    /// Only present when "Meta: Slices" is enabled when exporting in Aseprite.
     #[serde(default)]
     pub slices: Vec<Slice>,
 }
 
+/// Aseprite sprite sheet.
+///
+/// Root type in an Aseprite JSON file.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct SpritesheetData {
+    /// List with sprite frame definitions.
     #[serde(deserialize_with = "deserialize_frames")]
     pub frames: Vec<Frame>,
+    /// Meta data.
     pub meta: Metadata,
 }
 
